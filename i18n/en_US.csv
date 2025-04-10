@@ -1,0 +1,8 @@
+"Consider Product Quantity","Consider Product Quantity"
+"ElasticSuite Stock Filter","ElasticSuite Stock Filter"
+"General Configuration","General Configuration"
+"If set to Yes, stock filter will respect system backorders configuration for determining product stock status","If set to Yes, stock filter will respect system backorders configuration for determining product stock status"
+"If set to Yes, stock filter will consider product quantity for No Backorders mode. Products with qty ≤ 0 will be considered out of stock.","If set to Yes, stock filter will consider product quantity for No Backorders mode. Products with qty ≤ 0 will be considered out of stock."
+"In Stock","In Stock"
+"Out of Stock","Out of Stock"
+"Respect Backorders Configuration","Respect Backorders Configuration"

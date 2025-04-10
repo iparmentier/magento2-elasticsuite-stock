@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Amadeco ElasticsuiteStock Module
+ *
+ * @category   Amadeco
+ * @package    Amadeco_ElasticsuiteStock
+ * @author     Ilan Parmentier
+ */
+-->
+<indices xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="urn:magento:module:Smile_ElasticsuiteCore:etc/elasticsuite_indices.xsd">
+    <index identifier="catalog_product" defaultSearchType="product">
+        <type name="product" idFieldName="entity_id">
+            <mapping>
+                <field name="stock_status" type="integer" />
+            </mapping>
+        </type>
+    </index>
+</indices>

@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Amadeco ElasticsuiteStock Module
+ *
+ * @category   Amadeco
+ * @package    Amadeco_ElasticsuiteStock
+ * @author     Ilan Parmentier
+ */
+-->
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <body>
+        <referenceBlock name="catalog.navigation.renderer">
+            <block class="Amadeco\ElasticsuiteStock\Block\Navigation\Renderer\Stock"
+                   name="catalog.navigation.renderer.stock"
+                   template="Smile_ElasticsuiteCatalog::layer/filter/attribute.phtml"/>
+        </referenceBlock>
+    </body>
+</page>

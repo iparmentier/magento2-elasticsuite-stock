@@ -1,0 +1,8 @@
+<ol class="items" data-bind="foreach: getDisplayedItems()">
+    <li class="item">
+        <a class="stock-filter" data-bind="attr: {href:url}, visible: count >= 1">
+            <span data-bind="text: label"></span>
+            <span class="count" data-bind="text: count"></span>
+        </a>
+    </li>
+</ol>

@@ -1,0 +1,21 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Amadeco ElasticsuiteStock Module
+ *
+ * @category   Amadeco
+ * @package    Amadeco_ElasticsuiteStock
+ * @author     Ilan Parmentier
+ */
+ -->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <amadeco_elasticsuite_stock>
+            <general>
+                <respect_backorders>1</respect_backorders>
+                <consider_qty>1</consider_qty>
+            </general>
+        </amadeco_elasticsuite_stock>
+    </default>
+</config>

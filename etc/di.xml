@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * Amadeco ElasticsuiteStock Module
+ *
+ * @category   Amadeco
+ * @package    Amadeco_ElasticsuiteStock
+ * @author     Ilan Parmentier
+ */
+ -->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Smile\ElasticsuiteCore\Index\DataSourceResolver">
+        <arguments>
+            <argument name="datasources" xsi:type="array">
+                <item name="catalog_product" xsi:type="array">
+                    <item name="stock_status" xsi:type="object">Amadeco\ElasticsuiteStock\Model\Product\Indexer\Fulltext\Datasource\StockStatusData</item>
+                </item>
+            </argument>
+        </arguments>
+    </type>
+
+    <type name="\Smile\ElasticsuiteCatalog\Search\Request\Product\Attribute\AggregationResolver">
+        <plugin name="stock_aggregation" type="Amadeco\ElasticsuiteStock\Plugin\Search\Request\Product\Attribute\AggregationResolver"/>
+    </type>
+</config>
