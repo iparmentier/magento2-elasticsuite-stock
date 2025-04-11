@@ -10,8 +10,11 @@ declare(strict_types=1);
 
 namespace Amadeco\ElasticsuiteStock\Model\Product\Indexer\Fulltext\Datasource;
 
+use Amadeco\ElasticsuiteStock\Helper\Config;
+use Magento\CatalogInventory\Model\Stock;
+use Psr\Log\LoggerInterface;
 use Smile\ElasticsuiteCore\Api\Index\DatasourceInterface;
-use Amadeco\ElasticsuiteStock\Model\ResourceModel\Product\Indexer\Fulltext\Datasource\StockStatusData as ResourceModel;
+use Amadeco\ElasticsuiteStock\Plugin\Search\Request\Product\Attribute\AggregationResolver;
 
 /**
  * Stock Status Datasource
@@ -19,27 +22,48 @@ use Amadeco\ElasticsuiteStock\Model\ResourceModel\Product\Indexer\Fulltext\Datas
 class StockStatusData implements DatasourceInterface
 {
     /**
-     * @var ResourceModel
+     * @var Config
      */
-    private ResourceModel $resourceModel;
+    private Config $config;
+
+    /**
+     * @var LoggerInterface
+     */
+    private LoggerInterface $logger;
 
     /**
      * Constructor
      *
-     * @param ResourceModel $resourceModel Resource model
+     * @param Config $config Configuration helper
+     * @param LoggerInterface $logger Logger
      */
-    public function __construct(ResourceModel $resourceModel)
-    {
-        $this->resourceModel = $resourceModel;
+    public function __construct(
+        Config $config,
+        LoggerInterface $logger
+    ) {
+        $this->config = $config;
+        $this->logger = $logger;
     }
 
     /**
      * Add stock status data to the index data
      *
-     * {@inheritdoc}
+     * Stock Status ID
+     * -------------------------------------
+     * 0 => Out of Stock
+     * 1 => In Stock
+     *
+     * @param string|int $storeId
+     * @param array $indexData
      */
     public function addData($storeId, array $indexData)
     {
+        $shouldConsiderOnlyQty = $this->config->shouldConsiderOnlyQuantity((int)$storeId);
+        $isBackordersAllowed = $this->config->isBackordersAllowed((int)$storeId);
+
+        $attributeCode = AggregationResolver::STOCK_ATTRIBUTE;
+
+        /**
         $stockStatusData = $this->resourceModel->loadStockStatusData((int)$storeId, array_keys($indexData));
 
         array_walk($indexData, [$this, 'initStockStatusData']);
@@ -53,6 +77,34 @@ class StockStatusData implements DatasourceInterface
             } elseif (!in_array('stock_status', $indexData[$productId]['indexed_attributes'])) {
                 // Add stock_status only one time
                 $indexData[$productId]['indexed_attributes'][] = 'stock_status';
+            }
+        }
+        */
+
+        foreach ($indexData as $productId => &$productData) {
+            // Add stock_status to indexed_attributes if not already present
+            if (!isset($productData['indexed_attributes'])) {
+                $productData['indexed_attributes'] = [$attributeCode];
+            } elseif (!in_array($attributeCode, $productData['indexed_attributes'])) {
+                $productData['indexed_attributes'][] = $attributeCode;
+            }
+
+            // Initialize stock_status with default value
+            $productData[$attributeCode] = Stock::STOCK_OUT_OF_STOCK;
+
+            // If stock data is already available in the index, use it
+            if (isset($productData['stock']) && isset($productData['stock']['is_in_stock'])) {
+                $productData[$attributeCode] = (int)$productData['stock']['is_in_stock'];
+
+                if (
+                    $shouldConsiderOnlyQty &&
+                    (int)$productData['stock']['is_in_stock'] === Stock::STOCK_IN_STOCK &&
+                    isset($productData['stock']['qty'])
+                ) {
+                    $qty = (int)$productData['stock']['qty'];
+
+                    $productData[$attributeCode] = ($qty > 0) ? Stock::STOCK_IN_STOCK : Stock::STOCK_OUT_OF_STOCK;
+                }
             }
         }
 
@@ -69,6 +121,6 @@ class StockStatusData implements DatasourceInterface
      */
     private function initStockStatusData(array &$productData): void
     {
-        $productData['stock_status'] = 0;
+        $productData['stock_status'] = Stock::STOCK_OUT_OF_STOCK;
     }
 }

@@ -13,8 +13,7 @@
     <default>
         <amadeco_elasticsuite_stock>
             <general>
-                <respect_backorders>1</respect_backorders>
-                <consider_qty>1</consider_qty>
+                <consider_only_qty>1</consider_only_qty>
             </general>
         </amadeco_elasticsuite_stock>
     </default>

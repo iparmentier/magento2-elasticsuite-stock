@@ -84,17 +84,6 @@ class AggregationResolver
     ): array {
         if ($attribute->getAttributeCode() === self::STOCK_ATTRIBUTE) {
             $result = $this->stockAggregation->getAggregationData($attribute);
-
-            // Explicitly add stock.qty as an aggregation field if needed
-            $storeId = $this->storeManager->getStore()->getId();
-            $shouldRespectBackorders = $this->config->shouldRespectBackorders($storeId);
-            $shouldConsiderQty = $this->config->shouldConsiderQuantity($storeId);
-            $isBackordersAllowed = $this->config->isBackordersAllowed($storeId);
-
-            if ($shouldRespectBackorders && $shouldConsiderQty && !$isBackordersAllowed) {
-                // Ensure qty field is included in facets
-                $result['fields'] = [self::STOCK_FIELD, self::QTY_FIELD];
-            }
         }
 
         return $result;

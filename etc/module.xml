@@ -11,13 +11,8 @@
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Module/etc/module.xsd">
     <module name="Amadeco_ElasticsuiteStock">
         <sequence>
-            <module name="Smile_ElasticsuiteCore" />
+            <module name="Smile_ElasticsuiteRating" />
             <module name="Smile_ElasticsuiteCatalog" />
-            <module name="Magento_Search" />
-            <module name="Magento_Catalog" />
-            <module name="Magento_CatalogSearch" />
-            <module name="Magento_LayeredNavigation" />
-            <module name="Magento_CatalogInventory" />
         </sequence>
     </module>
 </config>

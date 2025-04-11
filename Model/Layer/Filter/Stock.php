@@ -10,16 +10,19 @@ declare(strict_types=1);
 
 namespace Amadeco\ElasticsuiteStock\Model\Layer\Filter;
 
-use Amadeco\ElasticsuiteStock\Helper\Config;
-use Magento\Catalog\Model\Layer\Filter\DataBuilder;
-use Magento\Store\Model\StoreManagerInterface;
-use Magento\Catalog\Model\Layer;
-use Magento\Framework\Filter\StripTags;
-use Magento\Catalog\Model\Layer\Filter\ItemFactory;
-use Magento\Search\Model\SearchEngine;
 use Magento\Framework\Search\Request\Builder;
 use Magento\Framework\App\RequestInterface;
-use Smile\ElasticsuiteCatalog\Helper\Attribute as AttributeHelper;
+use Magento\Framework\Escaper;
+use Magento\Framework\Filter\StripTags;
+use Magento\Search\Model\SearchEngine;
+use Magento\Store\Model\StoreManagerInterface;
+use Magento\Catalog\Model\Layer;
+use Magento\Catalog\Model\Layer\Filter\ItemFactory;
+use Magento\Catalog\Model\Layer\Filter\Item\DataBuilder;
+use Magento\CatalogInventory\Model\Stock as MagentoModelStock;
+use Smile\ElasticsuiteCatalog\Helper\ProductAttribute as AttributeHelper;
+use Amadeco\ElasticsuiteStock\Helper\Config;
+use Amadeco\ElasticsuiteStock\Plugin\Search\Request\Product\Attribute\AggregationResolver;
 
 /**
  * Products Stock Filter Model
@@ -38,9 +41,8 @@ class Stock extends \Smile\ElasticsuiteCatalog\Model\Layer\Filter\Attribute
      * @param StoreManagerInterface $storeManager        Store manager
      * @param Layer                 $layer               Layer
      * @param DataBuilder           $itemDataBuilder     Item data builder
-     * @param StripTags             $tagFilter           Strip tags filter
-     * @param SearchEngine          $searchEngine        Search engine
-     * @param Builder               $requestBuilder      Request builder
+     * @param StripTags             $tagFilter           String HTML tags filter.
+     * @param Escaper               $escaper             Html Escaper.
      * @param AttributeHelper       $attributeHelper     Attribute helper
      * @param Config                $config              Stock configuration helper
      * @param array                 $data                Custom data
@@ -51,8 +53,7 @@ class Stock extends \Smile\ElasticsuiteCatalog\Model\Layer\Filter\Attribute
         Layer $layer,
         DataBuilder $itemDataBuilder,
         StripTags $tagFilter,
-        SearchEngine $searchEngine,
-        Builder $requestBuilder,
+        Escaper $escaper,
         AttributeHelper $attributeHelper,
         Config $config,
         array $data = []
@@ -63,8 +64,7 @@ class Stock extends \Smile\ElasticsuiteCatalog\Model\Layer\Filter\Attribute
             $layer,
             $itemDataBuilder,
             $tagFilter,
-            $searchEngine,
-            $requestBuilder,
+            $escaper,
             $attributeHelper,
             $data
         );
@@ -89,45 +89,24 @@ class Stock extends \Smile\ElasticsuiteCatalog\Model\Layer\Filter\Attribute
             /** @var \Smile\ElasticsuiteCatalog\Model\ResourceModel\Product\Fulltext\Collection $productCollection */
             $productCollection = $this->getLayer()->getProductCollection();
 
-            $storeId = $this->getStoreId();
-            $shouldRespectBackorders = $this->config->shouldRespectBackorders($storeId);
-            $shouldConsiderQty = $this->config->shouldConsiderQuantity($storeId);
-            $isBackordersAllowed = $this->config->isBackordersAllowed($storeId);
-
-            // Filtre standard basé sur stock_status
-            if ((int)$value === 1) {
-                // Filtre pour les produits en stock
-                $productCollection->addFieldToFilter('stock_status', ['eq' => 1]);
-
-                // Si on considère les backorders et la quantité, ajouter un filtre sur qty > 0
-                // quand les backorders ne sont pas autorisés
-                if ($shouldRespectBackorders && $shouldConsiderQty && !$isBackordersAllowed) {
-                    $productCollection->addFieldToFilter('stock.qty', ['gt' => 0]);
-                }
+            // Use a consistent filter structure for both cases
+            if ((int)$value === MagentoModelStock::STOCK_IN_STOCK) {
+                // Filter for in-stock products
+                $productCollection->addFieldToFilter(AggregationResolver::STOCK_ATTRIBUTE, ['eq' => MagentoModelStock::STOCK_IN_STOCK]);
 
                 $filterLabel = __('In Stock');
-            } else {
-                // Filtre pour les produits hors stock
-                if ($shouldRespectBackorders && $shouldConsiderQty && !$isBackordersAllowed) {
-                    // Si les backorders ne sont pas autorisés et qu'on considère la quantité,
-                    // un produit est hors stock si stock_status = 0 OU qty <= 0
-                    $filter = [
-                        'bool' => [
-                            'should' => [
-                                ['term' => ['stock_status' => 0]],
-                                ['range' => ['stock.qty' => ['lte' => 0]]]
-                            ]
-                        ]
-                    ];
+            }
 
-                    $productCollection->addFieldToFilter('', $filter);
-                } else {
-                    // Sinon, simplement utiliser stock_status
-                    $productCollection->addFieldToFilter('stock_status', ['eq' => 0]);
-                }
+            /**
+             *
+            if ((int)$value === MagentoModelStock::STOCK_OUT_OF_STOCK) {
+                // Filter for out-of-stock products
+                $productCollection->addFieldToFilter(AggregationResolver::STOCK_ATTRIBUTE, ['eq' => MagentoModelStock::STOCK_OUT_OF_STOCK]);
 
                 $filterLabel = __('Out of Stock');
             }
+             *
+             */
 
             $layerState = $this->getLayer()->getState();
             $filter = $this->_createItem($filterLabel, $this->currentFilterValue);
@@ -144,17 +123,7 @@ class Stock extends \Smile\ElasticsuiteCatalog\Model\Layer\Filter\Attribute
      */
     protected function getFilterField(): string
     {
-        return 'stock_status';
-    }
-
-    /**
-     * Get current store id
-     *
-     * @return int
-     */
-    protected function getStoreId(): int
-    {
-        return (int) $this->_storeManager->getStore()->getId();
+        return AggregationResolver::STOCK_ATTRIBUTE;
     }
 
     /**
@@ -186,27 +155,32 @@ class Stock extends \Smile\ElasticsuiteCatalog\Model\Layer\Filter\Attribute
         /** @var \Smile\ElasticsuiteCatalog\Model\ResourceModel\Product\Fulltext\Collection $productCollection */
         $productCollection = $this->getLayer()->getProductCollection();
 
-        // Récupérer les données de facette pour stock_status
-        $optionsFacetedData = $productCollection->getFacetedData('stock_status');
+        // Retrieve facet data for stock_status
+        $optionsFacetedData = $productCollection->getFacetedData(AggregationResolver::STOCK_ATTRIBUTE);
 
         $items = [];
 
-        // Construire les éléments de filtre
+        // Build filter items
         if (isset($optionsFacetedData[1]) && $optionsFacetedData[1]['count'] > 0) {
             $items[] = [
                 'label' => __('In Stock'),
-                'value' => 1,
+                'value' => MagentoModelStock::STOCK_IN_STOCK,
                 'count' => $optionsFacetedData[1]['count'],
             ];
         }
 
+        /**
+         *
+         * What is the point to display out of stock products in term of UX ?
+         *
         if (isset($optionsFacetedData[0]) && $optionsFacetedData[0]['count'] > 0) {
             $items[] = [
                 'label' => __('Out of Stock'),
-                'value' => 0,
+                'value' => MagentoModelStock::STOCK_OUT_OF_STOCK,
                 'count' => $optionsFacetedData[0]['count'],
             ];
         }
+         */
 
         return $items;
     }

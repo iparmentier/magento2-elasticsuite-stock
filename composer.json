@@ -23,7 +23,8 @@
         "magento/framework": ">=103.0.0",
         "magento/magento-composer-installer": "*",
         "magento/module-catalog-inventory": ">=100.1.0",
-        "smile/elasticsuite": "^2.8.0"
+        "smile/elasticsuite": ">=2.8.0",
+        "smile/module-elasticsuite-rating": "^2.3"
     },
     "autoload": {
         "files": [

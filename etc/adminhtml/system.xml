@@ -17,18 +17,10 @@
             <resource>Smile_ElasticsuiteCore::configuration</resource>
             <group id="general" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>General Configuration</label>
-                <field id="respect_backorders" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Respect Backorders Configuration</label>
-                    <comment>If set to Yes, stock filter will respect system backorders configuration for determining product stock status</comment>
+                <field id="consider_only_qty" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Consider Only Product Quantity</label>
+                    <comment>If set to Yes, stock filter will consider only product quantity. Products with qty ≤ 0 will be considered out of stock. Please note, if you change this value, you will need to reindex Catalog Search index</comment>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                </field>
-                <field id="consider_qty" translate="label comment" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
-                    <label>Consider Product Quantity</label>
-                    <comment>If set to Yes, stock filter will consider product quantity for No Backorders mode. Products with qty ≤ 0 will be considered out of stock.</comment>
-                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
-                    <depends>
-                        <field id="respect_backorders">1</field>
-                    </depends>
                 </field>
             </group>
         </section>

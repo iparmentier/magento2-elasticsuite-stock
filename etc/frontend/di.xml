@@ -10,6 +10,11 @@
 -->
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+
+    <!-- Base preference for Smile ElasticsuiteCatalog's FilterList -->
+    <preference for="Smile\ElasticsuiteCatalog\Model\Layer\FilterList" type="Amadeco\ElasticsuiteStock\Model\Layer\FilterList"/>
+
+    <!-- Virtual types for category and search filter lists -->
     <virtualType name="categoryFilterList" type="Amadeco\ElasticsuiteStock\Model\Layer\FilterList">
         <arguments>
             <argument name="filters" xsi:type="array">
@@ -24,4 +29,7 @@
             </argument>
         </arguments>
     </virtualType>
+
+    <!-- preference to overwritte virtual type of Smile_ElasticsuiteRating -->
+    <preference for="Smile\ElasticsuiteRating\Model\Layer\FilterList" type="Amadeco\ElasticsuiteStock\Model\Layer\FilterList"/>
 </config>

@@ -23,8 +23,7 @@ class Config extends AbstractHelper
     /**
      * Configuration paths
      */
-    public const XML_PATH_RESPECT_BACKORDERS = 'amadeco_elasticsuite_stock/general/respect_backorders';
-    public const XML_PATH_CONSIDER_QTY = 'amadeco_elasticsuite_stock/general/consider_qty';
+    public const XML_PATH_CONSIDER_ONLY_QTY = 'amadeco_elasticsuite_stock/general/consider_only_qty';
 
     /**
      * @var InventoryConfig
@@ -44,32 +43,16 @@ class Config extends AbstractHelper
     }
 
     /**
-     * Check if we should respect backorders configuration
+     * Check if we should consider product quantity for stock status
      *
      * @param int|null $storeId Store ID
      *
      * @return bool
      */
-    public function shouldRespectBackorders(?int $storeId = null): bool
+    public function shouldConsiderOnlyQuantity(?int $storeId = null): bool
     {
         return $this->scopeConfig->isSetFlag(
-            self::XML_PATH_RESPECT_BACKORDERS,
-            ScopeInterface::SCOPE_STORE,
-            $storeId
-        );
-    }
-
-    /**
-     * Check if we should consider quantity for stock status
-     *
-     * @param int|null $storeId Store ID
-     *
-     * @return bool
-     */
-    public function shouldConsiderQuantity(?int $storeId = null): bool
-    {
-        return $this->shouldRespectBackorders($storeId) && $this->scopeConfig->isSetFlag(
-            self::XML_PATH_CONSIDER_QTY,
+            self::XML_PATH_CONSIDER_ONLY_QTY,
             ScopeInterface::SCOPE_STORE,
             $storeId
         );

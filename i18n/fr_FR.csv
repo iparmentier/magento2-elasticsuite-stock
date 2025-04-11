@@ -1,8 +1,7 @@
-"Consider Product Quantity","Prendre en compte la quantité des produits"
+"Consider Only Product Quantity","Prendre en compte uniquement la quantité des produits"
 "ElasticSuite Stock Filter","Filtre de stock ElasticSuite"
 "General Configuration","Configuration générale"
-"If set to Yes, stock filter will respect system backorders configuration for determining product stock status","Si activé, le filtre de stock tiendra compte de la configuration système des commandes en rupture pour déterminer le statut du stock"
-"If set to Yes, stock filter will consider product quantity for No Backorders mode. Products with qty ≤ 0 will be considered out of stock.","Si activé, le filtre de stock prendra en compte la quantité des produits en mode Sans commande en rupture. Les produits avec une quantité ≤ 0 seront considérés comme en rupture de stock."
+"If set to Yes, stock filter will consider only product quantity. Products with qty ≤ 0 will be considered out of stock. Please note, if you change this value, you will need to reindex Catalog Search index.",
+"Si activé, le filtre de stock prendra en compte uniquement la quantité des produits. Les produits avec une quantité ≤ 0 seront considérés comme en rupture de stock. Veuillez noter, qu'en cas de changement de cette valeur, vous devrez procdéder à la réindexation "
 "In Stock","En stock"
 "Out of Stock","Rupture de stock"
-"Respect Backorders Configuration","Respecter la configuration des commandes en rupture"
