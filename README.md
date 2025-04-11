@@ -40,7 +40,7 @@ Go to Stores > Configuration > ElasticSuite > Stock Filter
 
 Configure the following options:
 
-- Consider Only Product Quantity: When enabled, products with qty ≤ 0 will be considered out of stock whild qty > 0 will be considered in stock.
+- Consider Only Product Quantity: When enabled, products with qty ≤ 0 will be considered out of stock while qty > 0 will be considered in stock.
 
 ## Usage
 
@@ -82,6 +82,7 @@ Our implementation offers these advantages:
 While Magento has a built-in `quantity_and_stock_status` attribute, it has two significant limitations:
 1. It's stored as a complex structure that's difficult to use directly for filtering in ElasticSearch
 2. It's not natively filterable in Magento (see reported issue: https://github.com/magento/magento2/issues/33453)
+3. We want our proper custom attribute
 
 Our approach provides a cleaner, extensible, more efficient solution by using the properly indexed `stock.is_in_stock` and `stock.qty` fields directly.
 
