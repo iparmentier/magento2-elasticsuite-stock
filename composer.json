@@ -1,8 +1,8 @@
 {
     "name": "amadeco/module-elasticsuite-stock",
     "type": "magento2-module",
-    "license": "proprietary",
-    "description": "Amadeco ElasticSuite - Stock filter module.",
+    "license": "OSL-3",
+    "description": "Enhance your Magento 2 store with an advanced stock filter in ElasticSuite's layered navigation. This module provides customers with the ability to easily filter products by stock availability, improving the shopping experience and helping them find in-stock items faster. ",
     "authors": [
         {
             "name": "Ilan Parmentier",
