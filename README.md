@@ -1,9 +1,9 @@
 # Amadeco ElasticSuite Stock Filter Module
 
 [![Latest Stable Version](https://img.shields.io/github/v/release/Amadeco/module-elasticsuite-stock)](https://github.com/Amadeco/module-elasticsuite-stock/releases)
-[![License](https://img.shields.io/github/license/Amadeco/magento2-elasticsuite-stock)](https://github.com/Amadeco/magento2-elasticsuite-stock/blob/main/LICENSE)
-[![Magento](https://img.shields.io/badge/Magento-2.4.x-brightgreen.svg)](https://magento.com)
+[![Magento 2](https://img.shields.io/badge/Magento-2.4.x-brightgreen.svg)](https://magento.com)
 [![PHP](https://img.shields.io/badge/PHP-8.1|8.2|8.3-blue.svg)](https://www.php.net)
+[![License](https://img.shields.io/github/license/Amadeco/magento2-elasticsuite-stock)](https://github.com/Amadeco/magento2-elasticsuite-stock/blob/main/LICENSE)
 
 [SPONSOR: Amadeco](https://www.amadeco.fr)
 
