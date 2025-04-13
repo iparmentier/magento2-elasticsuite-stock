@@ -10,25 +10,31 @@ declare(strict_types=1);
 
 namespace Amadeco\ElasticsuiteStock\Model\Layer\Filter;
 
-use Magento\Framework\Search\Request\Builder;
-use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Escaper;
+use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Filter\StripTags;
-use Magento\Search\Model\SearchEngine;
 use Magento\Store\Model\StoreManagerInterface;
 use Magento\Catalog\Model\Layer;
-use Magento\Catalog\Model\Layer\Filter\ItemFactory;
 use Magento\Catalog\Model\Layer\Filter\Item\DataBuilder;
+use Magento\Catalog\Model\Layer\Filter\ItemFactory;
 use Magento\CatalogInventory\Model\Stock as MagentoModelStock;
-use Smile\ElasticsuiteCatalog\Helper\ProductAttribute as AttributeHelper;
+use Smile\ElasticsuiteCatalog\Api\LayeredNavAttributeInterface;
+use Smile\ElasticsuiteCatalog\Helper\ProductAttribute;
+use Smile\ElasticsuiteCatalog\Model\Attribute\LayeredNavAttributesProvider;
+use Smile\ElasticsuiteCatalog\Model\Attribute\Source\FilterDisplayMode;
+use Smile\ElasticsuiteCore\Search\Request\BucketInterface;
 use Amadeco\ElasticsuiteStock\Helper\Config;
-use Amadeco\ElasticsuiteStock\Plugin\Search\Request\Product\Attribute\AggregationResolver;
 
 /**
  * Products Stock Filter Model
  */
-class Stock extends \Smile\ElasticsuiteCatalog\Model\Layer\Filter\Attribute
+class Stock extends \Smile\ElasticsuiteCatalog\Model\Layer\Filter\Boolean
 {
+    /**
+     * @var StripTags
+     */
+    private StripTags $tagFilter;
+
     /**
      * @var Config
      */
@@ -37,15 +43,18 @@ class Stock extends \Smile\ElasticsuiteCatalog\Model\Layer\Filter\Attribute
     /**
      * Constructor.
      *
-     * @param ItemFactory           $filterItemFactory   Filter item factory
-     * @param StoreManagerInterface $storeManager        Store manager
-     * @param Layer                 $layer               Layer
-     * @param DataBuilder           $itemDataBuilder     Item data builder
-     * @param StripTags             $tagFilter           String HTML tags filter.
-     * @param Escaper               $escaper             Html Escaper.
-     * @param AttributeHelper       $attributeHelper     Attribute helper
-     * @param Config                $config              Stock configuration helper
-     * @param array                 $data                Custom data
+     * @SuppressWarnings(PHPMD.ExcessiveParameterList)
+     *
+     * @param ItemFactory                  $filterItemFactory            Factory for item of the facets.
+     * @param StoreManagerInterface        $storeManager                 Store manager.
+     * @param Layer                        $layer                        Catalog product layer.
+     * @param DataBuilder                  $itemDataBuilder              Item data builder.
+     * @param StripTags                    $tagFilter                    String HTML tags filter.
+     * @param Escaper                      $escaper                      Html Escaper.
+     * @param ProductAttribute             $mappingHelper                Mapping helper.
+     * @param LayeredNavAttributesProvider $layeredNavAttributesProvider Layered navigation attributes Provider.
+     * @param Config                       $config                       Stock configuration helper
+     * @param array                        $data                         Custom data
      */
     public function __construct(
         ItemFactory $filterItemFactory,
@@ -54,8 +63,10 @@ class Stock extends \Smile\ElasticsuiteCatalog\Model\Layer\Filter\Attribute
         DataBuilder $itemDataBuilder,
         StripTags $tagFilter,
         Escaper $escaper,
-        AttributeHelper $attributeHelper,
+        ProductAttribute $mappingHelper,
+        LayeredNavAttributesProvider $layeredNavAttributesProvider,
         Config $config,
+        array $hideNoValueAttributes = [],
         array $data = []
     ) {
         parent::__construct(
@@ -65,10 +76,13 @@ class Stock extends \Smile\ElasticsuiteCatalog\Model\Layer\Filter\Attribute
             $itemDataBuilder,
             $tagFilter,
             $escaper,
-            $attributeHelper,
+            $mappingHelper,
+            $layeredNavAttributesProvider,
+            $hideNoValueAttributes,
             $data
         );
 
+        $this->tagFilter = $tagFilter;
         $this->config = $config;
     }
 
@@ -81,65 +95,31 @@ class Stock extends \Smile\ElasticsuiteCatalog\Model\Layer\Filter\Attribute
      */
     public function apply(RequestInterface $request)
     {
-        $value = $request->getParam($this->_requestVar);
+        $attributeValue = $request->getParam($this->_requestVar);
 
-        if (null !== $value) {
-            $this->currentFilterValue = $value;
+        if (null !== $attributeValue) {
+            if (!is_array($attributeValue)) {
+                $attributeValue = [$attributeValue];
+            }
+            $this->currentFilterValue = $attributeValue;
 
-            /** @var \Smile\ElasticsuiteCatalog\Model\ResourceModel\Product\Fulltext\Collection $productCollection */
+            /** @var \Magento\CatalogSearch\Model\ResourceModel\Fulltext\Collection $productCollection */
             $productCollection = $this->getLayer()->getProductCollection();
 
-            // Use a consistent filter structure for both cases
-            if ((int)$value === MagentoModelStock::STOCK_IN_STOCK) {
-                // Filter for in-stock products
-                $productCollection->addFieldToFilter(AggregationResolver::STOCK_ATTRIBUTE, ['eq' => MagentoModelStock::STOCK_IN_STOCK]);
+            $filterField = $this->getFilterField();
 
-                $filterLabel = __('In Stock');
-            }
-
-            /**
-             *
-            if ((int)$value === MagentoModelStock::STOCK_OUT_OF_STOCK) {
-                // Filter for out-of-stock products
-                $productCollection->addFieldToFilter(AggregationResolver::STOCK_ATTRIBUTE, ['eq' => MagentoModelStock::STOCK_OUT_OF_STOCK]);
-
-                $filterLabel = __('Out of Stock');
-            }
-             *
-             */
-
+            $productCollection->addFieldToFilter($filterField, $this->getFilterValue($attributeValue));
             $layerState = $this->getLayer()->getState();
-            $filter = $this->_createItem($filterLabel, $this->currentFilterValue);
-            $layerState->addFilter($filter);
+
+            foreach ($this->currentFilterValue as $currentFilter) {
+                $filter = $this->_createItem(
+                    $this->_getLabel((int) $currentFilter),
+                    $this->currentFilterValue
+                );
+                $filter->setRawValue($currentFilter);
+                $layerState->addFilter($filter);
+            }
         }
-
-        return $this;
-    }
-
-    /**
-     * Retrieve ES filter field
-     *
-     * @return string
-     */
-    protected function getFilterField(): string
-    {
-        return AggregationResolver::STOCK_ATTRIBUTE;
-    }
-
-    /**
-     * Initialize filter items
-     *
-     * @return $this
-     * @SuppressWarnings(PHPMD.CamelCaseMethodName)
-     */
-    protected function _initItems()
-    {
-        $data  = $this->_getItemsData();
-        $items = [];
-        foreach ($data as $itemData) {
-            $items[] = $this->_createItem($itemData['label'], $itemData['value'], $itemData['count']);
-        }
-        $this->_items = $items;
 
         return $this;
     }
@@ -152,36 +132,102 @@ class Stock extends \Smile\ElasticsuiteCatalog\Model\Layer\Filter\Attribute
      */
     protected function _getItemsData(): array
     {
-        /** @var \Smile\ElasticsuiteCatalog\Model\ResourceModel\Product\Fulltext\Collection $productCollection */
+        /** @var \Magento\CatalogSearch\Model\ResourceModel\Fulltext\Collection $productCollection */
         $productCollection = $this->getLayer()->getProductCollection();
 
-        // Retrieve facet data for stock_status
-        $optionsFacetedData = $productCollection->getFacetedData(AggregationResolver::STOCK_ATTRIBUTE);
+        $optionsFacetedData = $productCollection->getFacetedData($this->getFilterField());
+
+        $minCount = !empty($optionsFacetedData) ? min(array_column($optionsFacetedData, 'count')) : 0;
+        $attribute = $this->getAttributeModel();
+        $forceDisplay = $attribute->getFacetDisplayMode() == FilterDisplayMode::ALWAYS_DISPLAYED;
 
         $items = [];
-
-        // Build filter items
-        if (isset($optionsFacetedData[1]) && $optionsFacetedData[1]['count'] > 0) {
-            $items[] = [
-                'label' => __('In Stock'),
-                'value' => MagentoModelStock::STOCK_IN_STOCK,
-                'count' => $optionsFacetedData[1]['count'],
-            ];
+        if (!empty($this->currentFilterValue) || $minCount < $productCollection->getSize() || $forceDisplay) {
+            foreach ($optionsFacetedData as $value => $data) {
+                $items[$value] = [
+                    'label' => $this->_getLabel($value),
+                    'value' => $value,
+                    'count' => $data['count'],
+                ];
+            }
         }
-
-        /**
-         *
-         * What is the point to display out of stock products in term of UX ?
-         *
-        if (isset($optionsFacetedData[0]) && $optionsFacetedData[0]['count'] > 0) {
-            $items[] = [
-                'label' => __('Out of Stock'),
-                'value' => MagentoModelStock::STOCK_OUT_OF_STOCK,
-                'count' => $optionsFacetedData[0]['count'],
-            ];
-        }
-         */
 
         return $items;
+    }
+
+    /**
+     * @SuppressWarnings(PHPMD.CamelCaseMethodName)
+     * @SuppressWarnings(PHPMD.ElseExpression)
+     * @SuppressWarnings(PHPMD.CyclomaticComplexity)
+     *
+     * {@inheritDoc}
+     */
+    protected function _initItems()
+    {
+        parent::_initItems();
+
+        foreach ($this->_items as $key => $item) {
+            $applyValue = $item->getValue();
+
+            if ($item->getValue() == MagentoModelStock::STOCK_IN_STOCK
+                || $item->getValue() == MagentoModelStock::STOCK_OUT_OF_STOCK
+            ) {
+                if (is_numeric($item->getLabel())) {
+                    $label = $this->_getLabel((int) $item->getLabel());
+                    $item->setLabel((string) $label);
+                }
+            }
+
+            if (($valuePos = array_search($applyValue, $this->currentFilterValue)) !== false) {
+                $item->setIsSelected(true);
+                $applyValue = $this->currentFilterValue;
+                unset($applyValue[$valuePos]);
+            } else {
+                $applyValue = array_merge($this->currentFilterValue, [$applyValue]);
+            }
+
+            $item->setApplyFilterValue(array_values($applyValue));
+        }
+
+        if (($this->getAttributeModel()->getFacetSortOrder() == BucketInterface::SORT_ORDER_MANUAL)
+            && (count($this->_items) > 1)
+        ) {
+            krsort($this->_items, SORT_NUMERIC);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Get filter value.
+     *
+     * @param mixed $value Filter value.
+     *
+     * @return mixed
+     */
+    private function getFilterValue(array $value)
+    {
+        $field = $this->getAttributeModel()->getAttributeCode();
+
+        $layeredNavAttribute = $this->layeredNavAttributesProvider->getLayeredNavAttribute($field);
+        if ($layeredNavAttribute instanceof LayeredNavAttributeInterface) {
+            return $layeredNavAttribute->getFilterQuery($value);
+        }
+
+        return $value;
+    }
+
+    /**
+     * Get filter label from the current value
+     *
+     * @return string
+     */
+    private function _getLabel(int $value): string
+    {
+        $label = $value === (int)MagentoModelStock::STOCK_IN_STOCK ?
+            __('In Stock') :
+            __('Out of Stock');
+
+        return $this->tagFilter->filter($label);
     }
 }

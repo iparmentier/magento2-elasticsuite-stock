@@ -9,9 +9,18 @@
 -->
 <ol class="items" data-bind="foreach: getDisplayedItems()">
     <li class="item">
-        <a class="stock-filter" data-bind="attr: {href:url}, visible: count >= 1">
+        <a data-bind="attr: {href:url, rel:$parent.displayRelNofollow}, visible: count >= 1">
+            <input type="checkbox"
+                   data-bind="checked: is_selected, attr: {id: id}, click: function(data, event) { event.target.parentNode.click(); return true; }" />
+            <label data-bind="attr: {for: id}">
+                <span data-bind="text: label"></span>
+                <span class="count" data-bind="text: count, visible: $parent.displayProductCount"></span>
+            </label>
+        </a>
+
+        <div data-bind="visible: count < 1">
             <span data-bind="text: label"></span>
             <span class="count" data-bind="text: count"></span>
-        </a>
+        </div>
     </li>
 </ol>
