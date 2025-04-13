@@ -12,6 +12,8 @@ This module by Amadeco extends the Smile ElasticSuite (https://github.com/Smile-
 
 ## Features
 
+<img width="1132" alt="Capture d’écran 2025-04-13 à 21 23 40" src="https://github.com/user-attachments/assets/ecdf90d2-6afa-4524-964a-b2127db1ea5b" />
+
 - Adds a dedicated stock filter in the layered navigation
 - Configure the filter behavior based on Magento's backorders setting
 - Option to consider product quantity for determining stock status
