@@ -52,10 +52,12 @@ class Stock extends \Smile\ElasticsuiteCatalog\Block\Navigation\Renderer\Attribu
         $filterItems = $this->getFilter()->getItems();
 
         $jsLayoutConfig = [
-            'component'    => self::JS_COMPONENT,
-            'hasMoreItems' => false,
-            'template'     => 'Amadeco_ElasticsuiteStock/stock-filter',
-            'maxSize'      => count($filterItems),
+            'component'           => self::JS_COMPONENT,
+            'maxSize'             => count($filterItems),
+            'displayProductCount' => (bool) $this->displayProductCount(),
+            'hasMoreItems'        => false,
+            'displayRelNofollow'  => $this->getRelNofollowValue(),
+            'template'            => 'Amadeco_ElasticsuiteStock/stock-filter'
         ];
 
         foreach ($filterItems as $item) {
