@@ -17,7 +17,7 @@
             <resource>Smile_ElasticsuiteCore::configuration</resource>
             <group id="general" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>General Configuration</label>
-                <field id="consider_only_qty" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                <field id="consider_only_qty" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1" canRestore="1">
                     <label>Consider Only Product Quantity</label>
                     <comment>If set to Yes, stock filter will consider only product quantity. Products with qty ≤ 0 will be considered out of stock. Please note, if you change this value, you will need to reindex Catalog Search index</comment>
                     <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
