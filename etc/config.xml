@@ -13,6 +13,7 @@
     <default>
         <amadeco_elasticsuite_stock>
             <general>
+                <display_out_of_stock_filter>0</display_out_of_stock_filter>
                 <consider_only_qty>1</consider_only_qty>
             </general>
         </amadeco_elasticsuite_stock>
