@@ -23,6 +23,7 @@ class Config extends AbstractHelper
     /**
      * Configuration paths
      */
+    public const XML_PATH_DISPLAY_OUT_OF_STOCK = 'amadeco_elasticsuite_stock/general/display_out_of_stock_filter';
     public const XML_PATH_CONSIDER_ONLY_QTY = 'amadeco_elasticsuite_stock/general/consider_only_qty';
 
     /**
@@ -40,6 +41,22 @@ class Config extends AbstractHelper
     ) {
         parent::__construct($context);
         $this->inventoryConfig = $inventoryConfig;
+    }
+
+    /**
+     * Check if we need show out of stock filter
+     *
+     * @param int|null $storeId Store ID
+     *
+     * @return bool
+     */
+    public function shouldDisplayOutOfStockFilter(?int $storeId = null): bool
+    {
+        return $this->scopeConfig->isSetFlag(
+            self::XML_PATH_DISPLAY_OUT_OF_STOCK,
+            ScopeInterface::SCOPE_STORE,
+            $storeId
+        );
     }
 
     /**
