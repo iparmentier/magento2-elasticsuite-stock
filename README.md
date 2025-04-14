@@ -36,6 +36,7 @@ bin/magento indexer:reindex catalogsearch_fulltext
 - PHP 8.1, 8.2 or 8.3
 - Magento 2.4.x
 - Smile ElasticSuite 2.8 or higher
+- Smile ElasticSuite Rating 2.3 or higher
 
 ## Configuration
 
@@ -94,6 +95,30 @@ Our approach provides a cleaner, extensible, more efficient solution by using th
 When the "Consider Only Product Quantity" option is enabled, our module implements this logic:
 - For products with `is_in_stock=1` but `qty<=0` are considered out of stock
 - This provides a more accurate representation of actual product availability to customers
+
+## Compatibility with Other ElasticSuite Modules
+
+### Interaction with Smile_ElasticsuiteRating
+
+Amadeco_ElasticsuiteStock extends the same core functionality as Smile_ElasticsuiteRating (both modules modify catalog filtering behavior). If you're using both modules together, please note:
+
+- This module replaces some functionality from Smile_ElasticsuiteRating through explicit class preferences
+- Both modules can work together, but correct loading order is important
+- For optimal functionality, Amadeco_ElasticsuiteStock should be loaded after Smile_ElasticsuiteRating
+
+### Installation Recommendations
+
+If you use both modules, ensure the correct loading order in your Magento installation:
+
+1. Check your `app/etc/config.php` file
+2. Make sure `Amadeco_ElasticsuiteStock` appears after `Smile_ElasticsuiteRating` in the modules list
+3. If you need to adjust the order, you can modify `config.php` or reinstall the modules in the correct sequence
+
+### Technical Implementation
+
+For developers: our module directly implements preferences for both `Smile\ElasticsuiteCatalog\Model\Layer\FilterList` and `Smile\ElasticsuiteRating\Model\Layer\FilterList` to ensure consistent behavior when both modules are present. Our Stock filter class extends `Smile\ElasticsuiteCatalog\Model\Layer\Filter\Boolean` for optimal handling of binary (in stock/out of stock) filtering.
+
+During updates of ElasticSuite modules, you may need to verify compatibility if core filtering mechanisms change.
 
 ## License
 
