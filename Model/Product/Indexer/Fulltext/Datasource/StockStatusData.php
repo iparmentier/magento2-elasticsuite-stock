@@ -58,7 +58,6 @@ class StockStatusData implements DatasourceInterface
      */
     public function addData($storeId, array $indexData)
     {
-        $shouldConsiderOnlyQty = $this->config->shouldConsiderOnlyQuantity((int)$storeId);
         $isBackordersAllowed = $this->config->isBackordersAllowed((int)$storeId);
 
         $attributeCode = AggregationResolver::STOCK_ATTRIBUTE;
@@ -97,13 +96,11 @@ class StockStatusData implements DatasourceInterface
                 $productData[$attributeCode] = (int)$productData['stock']['is_in_stock'];
 
                 if (
-                    $shouldConsiderOnlyQty &&
-                    (int)$productData['stock']['is_in_stock'] === Stock::STOCK_IN_STOCK &&
+                    $isBackordersAllowed &&
                     isset($productData['stock']['qty'])
                 ) {
                     $qty = (int)$productData['stock']['qty'];
-
-                    $productData[$attributeCode] = ($qty > 0) ? Stock::STOCK_IN_STOCK : Stock::STOCK_OUT_OF_STOCK;
+                    $productData[$attributeCode] = ($qty > .01) ? Stock::STOCK_IN_STOCK : Stock::STOCK_OUT_OF_STOCK;
                 }
             }
         }
