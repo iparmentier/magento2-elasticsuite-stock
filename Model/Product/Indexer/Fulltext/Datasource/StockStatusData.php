@@ -95,12 +95,9 @@ class StockStatusData implements DatasourceInterface
             if (isset($productData['stock']) && isset($productData['stock']['is_in_stock'])) {
                 $productData[$attributeCode] = (int)$productData['stock']['is_in_stock'];
 
-                if (
-                    $isBackordersAllowed &&
-                    isset($productData['stock']['qty'])
-                ) {
+                if ($isBackordersAllowed && isset($productData['stock']['qty'])) {
                     $qty = (int)$productData['stock']['qty'];
-                    $productData[$attributeCode] = ($qty > .01) ? Stock::STOCK_IN_STOCK : Stock::STOCK_OUT_OF_STOCK;
+                    $productData[$attributeCode] = ($qty > 0.01) ? Stock::STOCK_IN_STOCK : Stock::STOCK_OUT_OF_STOCK;
                 }
             }
         }
