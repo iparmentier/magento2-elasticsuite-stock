@@ -24,7 +24,6 @@ class Config extends AbstractHelper
      * Configuration paths
      */
     public const XML_PATH_DISPLAY_OUT_OF_STOCK = 'amadeco_elasticsuite_stock/general/display_out_of_stock_filter';
-    public const XML_PATH_CONSIDER_ONLY_QTY = 'amadeco_elasticsuite_stock/general/consider_only_qty';
 
     /**
      * @var InventoryConfig
@@ -54,22 +53,6 @@ class Config extends AbstractHelper
     {
         return $this->scopeConfig->isSetFlag(
             self::XML_PATH_DISPLAY_OUT_OF_STOCK,
-            ScopeInterface::SCOPE_STORE,
-            $storeId
-        );
-    }
-
-    /**
-     * Check if we should consider product quantity for stock status
-     *
-     * @param int|null $storeId Store ID
-     *
-     * @return bool
-     */
-    public function shouldConsiderOnlyQuantity(?int $storeId = null): bool
-    {
-        return $this->scopeConfig->isSetFlag(
-            self::XML_PATH_CONSIDER_ONLY_QTY,
             ScopeInterface::SCOPE_STORE,
             $storeId
         );
