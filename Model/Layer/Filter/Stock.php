@@ -152,6 +152,10 @@ class Stock extends \Smile\ElasticsuiteCatalog\Model\Layer\Filter\Boolean
             }
         }
 
+        if ($this->config->shouldDisplayOutOfStockFilter()) {
+            unset($items[MagentoModelStock::STOCK_OUT_OF_STOCK]);
+        }
+
         return $items;
     }
 
