@@ -21,7 +21,6 @@
         "inventory"
     ],
     "require": {
-        "php": "~8.1.0||~8.2.0||~8.3.0",
         "smile/elasticsuite": ">=2.8.0",
         "smile/module-elasticsuite-rating": "^2.3"
     },
