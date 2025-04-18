@@ -2,7 +2,7 @@
 
 [![Latest Stable Version](https://img.shields.io/github/v/release/Amadeco/magento2-elasticsuite-stock)](https://github.com/Amadeco/magento2-elasticsuite-stock/releases)
 [![Magento 2](https://img.shields.io/badge/Magento-2.4.x-brightgreen.svg)](https://magento.com)
-[![PHP](https://img.shields.io/badge/8.3-blue.svg)](https://www.php.net)
+[![PHP](https://img.shields.io/badge/PHP-8.3-blue.svg)](https://www.php.net)
 [![License](https://img.shields.io/github/license/Amadeco/magento2-elasticsuite-stock)](https://github.com/Amadeco/magento2-elasticsuite-stock/blob/main/LICENSE.txt)
 
 [SPONSOR: Amadeco](https://www.amadeco.fr)
