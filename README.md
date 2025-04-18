@@ -32,7 +32,7 @@ bin/magento indexer:reindex catalogsearch_fulltext
 
 ## Requirements
 
-- PHP 8.1, 8.2 or 8.3
+- PHP 8.3+
 - Magento 2.4.x
 - Smile ElasticSuite 2.8 or higher
 - Smile ElasticSuite Rating 2.3 or higher
